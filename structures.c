@@ -47,5 +47,5 @@ struct node{
 /*
  * A list is nothing but a pointer to the first element.
  */
-typedef *node list;
+typedef *node stack;
 #endif
