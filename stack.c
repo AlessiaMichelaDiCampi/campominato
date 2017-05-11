@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "structures.c"
+#include "structures.h"
 #include "stack.h"
 
 /*
@@ -12,63 +12,78 @@ void init(stack l){
 
 /*
  * Pushes a turn into the given stack
+ l = node*
+ temp = node*
  */
-int push(stack l, turn t){
-    if (l == NULL)
+void push(stack* l, turn* t){
+    node* temp;
+    if(!temp) return;
+    if (!(*l))
     {
-        l =(struct node *)malloc(1*sizeof(struct node));
-        l->ptr = NULL;
-        l->info = t;
+        (*l) =(node*)malloc(sizeof(node));
+        (*l)->ptr = NULL;
+        (*l)->info.turn_number = t -> turn_number;
+        (*l)->info.cell_id = t -> cell_id;
     }
     else
     {
-        temp =(struct node *)malloc(1*sizeof(struct node));
-        temp->ptr = top;
-        temp->info = t;
-        l = temp;
+        temp =(node*)malloc(sizeof(node));
+        temp->ptr = *l;
+        temp->info.turn_number = t -> turn_number;
+        temp->info.cell_id = t -> cell_id;
+        (*l) = temp;
     }
-    return 1;
 }
 
-turn pop(stack l)
+turn* pop(stack* l)
 {
-    stack temp;
-    turn gone;
-    temp = (struct node *)malloc(1*sizeof(struct node));
-    gone = (struct node *)malloc(1*sizeof(struct turn));
-    temp = l;
-    if (temp == NULL) return NULL;
+    node* temp;
+    turn* gone;
+    temp = (node*)malloc(sizeof(node));
+    temp = (*l);
+    gone = (turn*)NULL;
+    if (!temp) return gone;
+    gone = (turn*)malloc(sizeof(turn));
     temp = temp->ptr;
-    gone = l -> info;
-    free(l);
-    l = temp;
+    *gone = (*l) -> info;
+    free(*l);
+    *l = temp;
     return gone;
 }
 
-turn peek(stack l){
-    if(l == NULL) return NULL;
-    return l -> info;
+turn* peek(stack *l){
+    turn* fake;
+    fake = (turn*)NULL;
+    if(!(*l)) return fake;
+    fake = (turn*)malloc(sizeof(turn));
+    fake -> turn_number = (*l) -> info.turn_number;
+    fake -> cell_id = (*l) -> info.cell_id;
+    return fake;
 }
 
-int count(stack l){
+int count(stack *l){
     int count = 0;
-    while((*l) -> ptr != NULL) count++;
+    node* iterator = *l;
+    while(iterator){
+        count++;
+        iterator = iterator -> ptr;
+    }     
     return count;
 }
 
-void destroy(stack l)
+void destroy(stack* l)
 {
-	stack top1;
-	top1 = (struct node *)malloc(1*sizeof(struct node));
-    top1 = l;
- 
-    while (top1 != NULL)
+	node* top1;
+	top1 = (node*)malloc(sizeof(node));
+    top1 = *l;
+
+    while (top1)
     {
-        top1 = l->ptr;
-        free(l);
-        l = top1;
+        top1 = (*l)->ptr;
+        free(*l);
+        (*l) = top1;
         top1 = top1->ptr;
     }
     free(top1);
-    l = NULL;
+    *l = NULL;
 }
