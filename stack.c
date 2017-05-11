@@ -11,9 +11,10 @@ void init(stack l){
 }
 
 /*
- * Pushes a turn into the given stack
- l = node*
- temp = node*
+ * Given a stack pointer and a turn pointer, it inserts the
+ * data pointed by the turn pointer into the stack.
+ * NOTE: this function is a NOP if either the stack pointer
+ * is NULL or the turn pointer is NULL 
  */
 void push(stack* l, turn* t){
     node* temp;
@@ -35,6 +36,10 @@ void push(stack* l, turn* t){
     }
 }
 
+/*
+ * Removes the last inserted item and returns a pointer to it.
+ * Returns NULL if the stack is empty.
+ */
 turn* pop(stack* l)
 {
     node* temp;
@@ -51,6 +56,10 @@ turn* pop(stack* l)
     return gone;
 }
 
+/*
+ * Returns the last inserted item of the stack without
+ * removing it. Returns NULL if the stack is empty.
+ */
 turn* peek(stack *l){
     turn* fake;
     fake = (turn*)NULL;
@@ -61,6 +70,9 @@ turn* peek(stack *l){
     return fake;
 }
 
+/*
+ * Returns the number of items in the given stack.
+ */
 int count(stack *l){
     int count = 0;
     node* iterator = *l;
@@ -71,6 +83,10 @@ int count(stack *l){
     return count;
 }
 
+/*
+ * Destroys a list. Destruction means freeing every cell of memory
+ * given to the stack and nullifying the pointer.
+ */
 void destroy(stack* l)
 {
 	node* top1;
