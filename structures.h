@@ -7,14 +7,17 @@
  * Structure representing a cell on the field. For each cell, information
  * required are the cell id, the row number and the col number (for graphic),
  * the state (FALSE: covered, TRUE: uncovered) and the possible flag set
- * (flagged -> FALSE: not flagged, TRUE: flagged) 
+ * (flagged -> FALSE: not flagged, TRUE: flagged).
+ * Value must be evaluated like:
+ * < 0 : empy cell;
+ * 0: bomb;
+ * > 0: number in the cell;
  */
 typedef struct Cell{
 	int id;
-	int position_x;
-	int position_y;
 	int state;
 	int flagged;
+	int value;
 } cell;
 
 /*
