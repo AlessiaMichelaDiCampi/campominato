@@ -46,7 +46,7 @@ field* parse(char* filename, int *width, int *heigth){
 	while(!feof(source) && !fail){
 		if(!fscanf(source, "%d,%d", buff_pos_x, buff_pos_y)) fail = TRUE;
 		if(*buff_pos_x < *max_x && *buff_pos_y < *max_y){
-			set_numbers_around(parsed, *buff_pos_x, *buff_pos_y);
+			set_numbers_around(parsed, *buff_pos_x, *buff_pos_y, *width, *heigth);
 			(*parsed)[*buff_pos_x][*buff_pos_y].value = 0;
 		}
 	}
@@ -54,10 +54,14 @@ field* parse(char* filename, int *width, int *heigth){
 	fclose(source);
 	return parsed;
 }
-void set_numbers_around(field *f, int x, int y){
-	int offset_x, offset_y;
-	for(offset_x = -1; offset_x <= 1; offset_x++){
-		for(offset_y = -1; offset_y <= 1; offset_y++){
+void set_numbers_around(field *f, int x, int y, int width, int heigth){
+	int offset_x, offset_y, min_x, min_y, max_x, max_y;
+	min_x = x == 0 ? 0 : -1;
+	max_x = x == width - 1 ? 0 : 1;
+	for(offset_x = min_x; offset_x <= max_x; offset_x++){
+		min_y = y == 0 ? 0 : -1;
+		max_y = y == heigth - 1 ? 0 : 1;
+		for(offset_y = min_y; offset_y <= max_y; offset_y++){
 			if((*f)[x + offset_x][y + offset_y].value > 0) (*f)[x + offset_x][y + offset_y].value++;
 			else if ((*f)[x + offset_x][y + offset_y].value < 0) (*f)[x + offset_x][y + offset_y].value = 1;
 		}
