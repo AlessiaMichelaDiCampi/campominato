@@ -52,4 +52,15 @@ typedef struct Node{
  * A list is nothing but a pointer to the first element.
  */
 typedef node* stack;
+
+
+/*
+ * Introdotta questa struttura con il seguente scopo: quando scopro una cella, voglio restituire
+ * al chiamante (che sraà l'interfaccia grafica) un array di tutte le celle scoperte con i relativi
+ * valori in modo da evitare una scansione completa del campo ad ogni turno.
+ */
+typedef struct Flip{
+	int cell_id;
+	int value;
+} flip;
 #endif
