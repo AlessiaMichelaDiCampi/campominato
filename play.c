@@ -4,7 +4,7 @@
 
 flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *history);
 int flag(field *battlefield, int cell_id);
-int* rollback(field *battlefield, int rollback_target);
+int* rollback(field *battlefield, int rollback_target, stack *history);
 void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history, flip **flips);
 
 /*
@@ -68,4 +68,27 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
 	}
 	if(y - 1 > 0) bare_neighbours(battlefield, x, y - 1, width, heigth, history, flips);
 	if(y + 1 < heigth) bare_neighbours(battlefield, x, y + 1, width, heigth, history, flips);
+}
+
+int flag(field *battlefield, int cell_id, int width, int heigth){
+	int x, y;
+	x = cell_id % width;
+	y = cell_id / width;
+	(*battlefield)[x][y].flagged = !((*battlefield)[x][y].flagged);
+	return (*battlefield)[x][y].flagged;
+}
+
+int* rollback(field *battlefield, int rollback_target, stack *history){
+	int *ids, x, y;
+	turn *pop;
+	ids = (int*)malloc(sizeof(int) * width * heigth);
+	while(peek(&history) -> turn_number >= rollback_target){
+		pop = pop(&history);
+		*ids = pop -> cell_id;
+		x = *ids % width;
+		y = *ids / width;
+		(*battlefield)[x][y].state = 0;
+		ids++;
+	}
+	return ids;
 }
