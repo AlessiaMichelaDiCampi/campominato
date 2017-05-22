@@ -21,19 +21,15 @@ uint64_t state[2];
  */
 void random_init(void){
 	state[0] = (uint64_t)(time(NULL) * SEED_GENERATION_CONST);
-	printf("<random_init> state[0] = %"PRId64"\n", state[0]);
 	state[1] = state[0] ^ SEED_GENERATION_CONST;
-	printf("<random_init> state[1] = %"PRId64"\n", state[1]);
 }
 
 uint64_t xorshift128plus(void){
 	uint64_t x = state[0];
 	uint64_t const y = state[1];
-	printf("<xorshift128plus> Before -> state[0]: %"PRId64", state[1]: %"PRId64"\n", state[0], state[1]);
 	state[0] = y;
 	x ^= x << 23;
 	state[1] = x ^ y ^ (x >> 17) ^ (y >> 26);
-	printf("<xorshift128plus> After -> state[0]: %"PRId64", state[1]: %"PRId64" ; Giving %"PRId64"\n", state[0], state[1], imaxabs(state[1] + y));
 	return imaxabs(state[1] + y);
 }
 
@@ -45,16 +41,12 @@ field* generate(int width, int heigth, int mines){
 									 */
 	if(width > MAX_FIELD_LENGTH || heigth > MAX_FIELD_LENGTH || mines > width * heigth || mines == 0 || width == 0 || heigth == 0) return NULL; /* se non sono input validi non genero nulla */
 	generating = (field*)malloc(sizeof(field));
-	printf("<generate>Malloc done\n");
 	initialize_field(generating, width, heigth);
-	printf("<generate>Init done\n");
 	random_init();
 	while(mines){
 		proxy = abs(xorshift128plus()) % (width * heigth);
-		printf("<generate> Proxy: %d\n", proxy);
 		proxy_x = proxy % width;
 		proxy_y = proxy / width;
-		printf("<generate>Randoms: %d,%d; Left: %d\n", proxy_x, proxy_y, mines);
 		if((*generating)[proxy_x][proxy_y].value != 0){
 			min_x = proxy_x == 0 ? 0 : -1;
 			max_x = proxy_x == width - 1 ? 0 : 1;
@@ -68,10 +60,7 @@ field* generate(int width, int heigth, int mines){
 			}
 			(*generating)[proxy_x][proxy_y].value = 0;
 			mines--;
-			printf("<generate>Done. Left: %d\n", mines);
 		}
-		/* debug */
-		else printf("<generate>Already exists, skipping. Left: %d\n", mines);
 	}
 	return generating;
 }
