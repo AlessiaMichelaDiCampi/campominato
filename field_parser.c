@@ -3,7 +3,7 @@
 #include "structures.h"
 
 field* parse(char* filename, int *width, int *heigth);
-void set_numbers_around(field *f, int x, int y);
+void set_numbers_around(field *f, int x, int y, int width, int heigth);
 
 field* parse(char* filename, int *width, int *heigth){
 	FILE *source;
