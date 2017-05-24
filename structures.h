@@ -2,6 +2,10 @@
 #define STRUCTURES_H
 #define FALSE 0
 #define TRUE 1
+#define COVERED 0
+#define FLIPPED 1
+#define EMPTY_CELL -1
+#define MINE 0
 #define MAX_FIELD_LENGTH 100
 /*
  * Structure representing a cell on the field. For each cell, information
