@@ -41,10 +41,14 @@ flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *histo
 	return flips;
 }
 
+/*
+ * Chiamata che ricorsivamente scopre tutti i vicini di una cella vuota finchè non incontra numeri. Tutte le caselle
+ * scoperte sono caricate nell'array **flips
+ */
 void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history, flip **flips){
 	turn *temp;
-	if((*battlefield)[x][y].value == 0) return;
-	if((*battlefield)[x][y].state == 1) return; /* onde evitare di rompersi i maroni a capire se dalla posizione attuale devo chiamare solo a destra
+	if((*battlefield)[x][y].value == MINE) return;
+	if((*battlefield)[x][y].state == FLIPPED) return; /* onde evitare di rompersi i maroni a capire se dalla posizione attuale devo chiamare solo a destra
 												 * o solo a sinistra o quel che è, ognuno chiama tutti quelli attorno. Se sono già scoperti terminano.
 												 */
 	/* se non è una mina, allora deve scoprirsi, registrarsi nello stack dei turni, registrarsi nell'array restituito e chiamare tutti i vicini a sua volta. */
@@ -70,6 +74,9 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
 	if(y + 1 < heigth) bare_neighbours(battlefield, x, y + 1, width, heigth, history, flips);
 }
 
+/*
+ * Funzione che flagga la casella richiesta e ritorna il suo attuale stato di flag.
+ */
 int flag(field *battlefield, int cell_id, int width, int heigth){
 	int x, y;
 	x = cell_id % width;
@@ -78,6 +85,10 @@ int flag(field *battlefield, int cell_id, int width, int heigth){
 	return (*battlefield)[x][y].flagged;
 }
 
+/*
+ * Funzione che annulla tutte le mosse fino a quella richiesta COMPRESA.
+ * Restituisce l'array degli id delle caselle da ricoprire
+ */
 int* rollback(field *battlefield, int rollback_target, stack *history){
 	int *ids, x, y;
 	turn *pop;
@@ -91,4 +102,19 @@ int* rollback(field *battlefield, int rollback_target, stack *history){
 		ids++;
 	}
 	return ids;
+}
+
+int win(field *f, int width, int heigth){
+	int victoryConditionsMatched = TRUE, i, j;
+	for(i = 0; i < width && victoryConditionsMatched; i++)
+		for(j = 0; j < heigth && victoryConditionsMatched; j++)
+			victoryConditionsMatched = ((*f)[i][j] -> state == COVERED && (*f)[i][j] -> value == MINE) || ((*f)[i][j] -> state == FLIPPED && (*f)[i][j] -> value != MINE);
+	return victoryConditionsMatched;
+}
+
+int loss(field *f, int width, int heigth){
+	int lossConditionMatched = FALSE;
+	for(i = 0; i < width && !lossConditionMatched; i++)
+		for(j = 0; j < heigth && !lossConditionMatched; j++)
+			lossConditionMatched = (*f)[i][j] -> value == MINE && (*f)[i][j] -> state == FLIPPED;
 }
