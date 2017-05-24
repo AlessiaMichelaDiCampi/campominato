@@ -6,13 +6,14 @@
 #include "field_parser.h"
 
 /*
+ * '?' : mi passano null (quando succede?)
  * '#' : coperta
  * '@' : mina
  * ' ' : vuota
  * Altrimenti è numero
  */
 char cell_value(cell *c){
-	if(!c) return '';
+	if(!c) return '?';
 	if(c -> state == COVERED) return '#';
 	if(c -> value < 0) return ' ';
 	if(c -> value == MINE) return '@';
@@ -34,22 +35,17 @@ int main(){
 	int width, heigth, end_game = 0, id, n_turn = 1, rollbacks = 5, jump_distance = 0, end_as_winnner;
 	char command_buffer[20];
 	stack turns;
-	flip **proxy;
 	turns = NULL;
 	zone = (field*)malloc(sizeof(field));
-	zone = parse("test_parse.txt", &width, &height);
+	zone = parse("test_parse.txt", &width, &heigth);
 	while(!end_game){
 		print_field(zone, width, heigth);
 		printf("\nTurno %d\nRollbacks: %d\nInserire comando: \n", n_turn, rollbacks);
-		scanf("%s %d %d", command_buffer,&id); //parso il comando e i parametri (id è cell_id se scopro o flaggo, altrimenti ignorato )
-		if(strcmp(command_buffer, "bare") == 0){
-			proxy = bare(zone, width, heigth, id, &turns);
-			if(proxy[0] -> value == MINE) end_game == 1;
-		}
-		else if (strcmp(command_buffer, "flag") == 0)
-			flag(zone, id);
+		scanf("%s %d", command_buffer,&id); /*parso il comando e i parametri (id è cell_id se scopro o flaggo, altrimenti ignorato )*/
+		if(strcmp(command_buffer, "bare") == 0) bare(zone, width, heigth, id, &turns);
+		else if (strcmp(command_buffer, "flag") == 0) flag(zone, id, width, heigth);
 		else if(strcmp(command_buffer, "rollback") && rollbacks > 0){
-			rollback(zone, n_turn - jump_distance, turns);
+			rollback(zone, n_turn - jump_distance, &turns, width);
 			rollbacks--;
 			jump_distance++;
 		}
@@ -65,4 +61,5 @@ int main(){
 	}
 	if(end_as_winnner) printf("HAI VINTO\n");
 	else printf("HAI PERSO\n");
+	return 0;
 }

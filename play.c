@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "structures.h"
+#include "stack.h"
 
 flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *history);
-int flag(field *battlefield, int cell_id);
-int* rollback(field *battlefield, int rollback_target, stack *history);
+int flag(field *battlefield, int cell_id, int width, int heigth);
+int* rollback(field *battlefield, int rollback_target, stack *history, int width);
 void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history, flip **flips);
 
 /*
@@ -27,11 +28,11 @@ flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *histo
 	pos_y = cell_id / width;
 	(*battlefield)[pos_x][pos_y].state = 1;
 	/* push del turno effettuato (anzichè farmi passare il turno attuale, controllo l'ultimo push e incremento) */
-	turn_number = (peek(&history) -> turn_number) + 1;
+	turn_number = (peek(history) -> turn_number) + 1;
 	temp_turn = (turn*)malloc(sizeof(turn));
 	temp_turn -> turn_number = turn_number;
 	temp_turn -> cell_id = cell_id;
-	push(&history, temp_turn);
+	push(history, temp_turn);
 	/* carichiamo nell'array di flips il dato della casella svuotata */
 	(*flips) = (flip*)malloc(sizeof(flip));
 	(*flips) -> cell_id = cell_id;
@@ -54,8 +55,8 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
 	/* se non è una mina, allora deve scoprirsi, registrarsi nello stack dei turni, registrarsi nell'array restituito e chiamare tutti i vicini a sua volta. */
 	temp = (turn*)malloc(sizeof(turn));
 	temp -> cell_id = (*battlefield)[x][y].id;
-	temp -> turn_number = peek(&history) -> turn_number;
-	push(&history, temp);
+	temp -> turn_number = peek(history) -> turn_number;
+	push(history, temp);
 	(*flips) = (flip*)malloc(sizeof(flip));
 	(*flips) -> cell_id = (*battlefield)[x][y].id;
 	(*flips) -> value = (*battlefield)[x][y].value;
@@ -89,13 +90,13 @@ int flag(field *battlefield, int cell_id, int width, int heigth){
  * Funzione che annulla tutte le mosse fino a quella richiesta COMPRESA.
  * Restituisce l'array degli id delle caselle da ricoprire
  */
-int* rollback(field *battlefield, int rollback_target, stack *history){
+int* rollback(field *battlefield, int rollback_target, stack *history, int width){
 	int *ids, x, y;
-	turn *pop;
-	ids = (int*)malloc(sizeof(int) * width * heigth);
-	while(peek(&history) -> turn_number >= rollback_target){
-		pop = pop(&history);
-		*ids = pop -> cell_id;
+	turn *popd;
+	ids = (int*)malloc(sizeof(int) * count(history));
+	while(peek(history) -> turn_number >= rollback_target){
+		popd = pop(history);
+		*ids = popd -> cell_id;
 		x = *ids % width;
 		y = *ids / width;
 		(*battlefield)[x][y].state = 0;
@@ -108,13 +109,14 @@ int win(field *f, int width, int heigth){
 	int victoryConditionsMatched = TRUE, i, j;
 	for(i = 0; i < width && victoryConditionsMatched; i++)
 		for(j = 0; j < heigth && victoryConditionsMatched; j++)
-			victoryConditionsMatched = ((*f)[i][j] -> state == COVERED && (*f)[i][j] -> value == MINE) || ((*f)[i][j] -> state == FLIPPED && (*f)[i][j] -> value != MINE);
+			victoryConditionsMatched = ((*f)[i][j].state == COVERED && (*f)[i][j].value == MINE) || ((*f)[i][j].state == FLIPPED && (*f)[i][j].value != MINE);
 	return victoryConditionsMatched;
 }
 
 int loss(field *f, int width, int heigth){
-	int lossConditionMatched = FALSE;
+	int lossConditionMatched = FALSE, i, j;
 	for(i = 0; i < width && !lossConditionMatched; i++)
 		for(j = 0; j < heigth && !lossConditionMatched; j++)
-			lossConditionMatched = (*f)[i][j] -> value == MINE && (*f)[i][j] -> state == FLIPPED;
+			lossConditionMatched = (*f)[i][j].value == MINE && (*f)[i][j].state == FLIPPED;
+	return lossConditionMatched;
 }
