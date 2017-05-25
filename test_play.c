@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "structures.h"
 #include "play.h"
 #include "field_parser.h"
@@ -32,22 +33,10 @@ void print_field(field *f, int width, int heigth){
 	}
 }
 
-/*
- * Per debug, stampiamo lo stack dei turni ad ogni turno
- */
-void print_stack_debug(stack l){
-	node* iterator;
-	iterator = (node*)malloc(sizeof(node));
-	iterator = l;
-	if(!iterator){
-		printf("Stack empty\n");
-		return;
-	} 
-	printf("Print stack:\n");
-	while(iterator){
-		printf("\tTurn: info.turn_number -> %d, info.cell_id -> %d\n",iterator -> info.turn_number, iterator -> info.cell_id);
-		iterator = iterator -> ptr;
-	}
+
+void clrscr()
+{
+    system("@cls||clear");
 }
 
 
@@ -62,7 +51,6 @@ int main(){
 	t -> cell_id = 0;
 	turns = NULL;
 	push(&turns, t);
-	print_stack_debug(turns);
 	zone = (field*)malloc(sizeof(field));
 	zone = parse("test_parse.txt", &width, &heigth);
 	printf("Campo caricato da test_parse.txt.\nIstruzioni: ci sono tre comandi disponibili:\n\t1)Scopri cella: scrivere 'bare x y' dove x,y sono le coordinate;\n\t2)Metti la bandierina: scrivere 'flag x y' dove x e y sono le coordinate\n\t3)Annulla mossa: scrivi 'rollback 0 0'\n");
@@ -106,7 +94,7 @@ int main(){
 			end_game = 1;
 			end_as_winnner = 0;
 		}
-		print_stack_debug(turns);
+		clrscr();
 	}
 	print_field(zone, width, heigth);
 	if(end_as_winnner) printf("HAI VINTO\n");
