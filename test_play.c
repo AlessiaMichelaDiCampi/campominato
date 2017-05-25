@@ -56,7 +56,13 @@ int main(){
 	int width, heigth, end_game = 0, x, y, n_turn = 1, rollbacks = 5, jump_distance = 1, end_as_winnner;
 	char command_buffer[20];
 	stack turns;
+	turn *t;
+	t = (turn*)malloc(sizeof(turn));
+	t -> turn_number = 0;
+	t -> cell_id = 0;
 	turns = NULL;
+	push(&turns, t);
+	print_stack_debug(turns);
 	zone = (field*)malloc(sizeof(field));
 	zone = parse("test_parse.txt", &width, &heigth);
 	printf("Campo caricato da test_parse.txt.\nIstruzioni: ci sono tre comandi disponibili:\n\t1)Scopri cella: scrivere 'bare x y' dove x,y sono le coordinate;\n\t2)Metti la bandierina: scrivere 'flag x y' dove x e y sono le coordinate\n\t3)Annulla mossa: scrivi 'rollback 0 0'\n");
