@@ -3,10 +3,10 @@
 #include "structures.h"
 #include "stack.h"
 
-flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *history);
-int flag(field *battlefield, int cell_id, int width, int heigth);
-int* rollback(field *battlefield, int rollback_target, stack *history, int width);
-void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history, flip **flips);
+flip** bare(field *battlefield, int width, int heigth, int x, int y, stack history);
+int flag(field *battlefield, int x, int y, int width, int heigth);
+void rollback(field *battlefield, int rollback_target, stack history, int width);
+void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack history, flip **flips);
 
 /*
  * La funzione scopre il valore di una cella nella struttura dati.
@@ -19,26 +19,24 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
  * a ricercare la cella per estrarne il valore, restituiamo il campo 'value' della
  * struct cell.
  */
-flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *history){
-	int pos_x, pos_y, turn_number;
+flip** bare(field *battlefield, int width, int heigth, int x, int y, stack history){
+	int turn_number;
 	flip** flips; /* funge da array di azioni che la grafica deve effettuare per pareggiarsi con lo stato del sistema */
 	turn *temp_turn;
 	flips = (flip**)malloc(sizeof(flip*) * (width * heigth));
-	pos_x = cell_id % width;
-	pos_y = cell_id / width;
-	(*battlefield)[pos_x][pos_y].state = 1;
 	/* push del turno effettuato (anzichè farmi passare il turno attuale, controllo l'ultimo push e incremento) */
-	turn_number = (peek(history) -> turn_number) + 1;
+	turn_number = (peek(&history) -> turn_number) + 1;
 	temp_turn = (turn*)malloc(sizeof(turn));
 	temp_turn -> turn_number = turn_number;
-	temp_turn -> cell_id = cell_id;
-	push(history, temp_turn);
+	temp_turn -> cell_id = y * width + x;
+	push(&history, temp_turn);
 	/* carichiamo nell'array di flips il dato della casella svuotata */
 	(*flips) = (flip*)malloc(sizeof(flip));
-	(*flips) -> cell_id = cell_id;
-	(*flips) -> value = (*battlefield)[pos_x][pos_y].value;
+	(*flips) -> cell_id = y * width + x;
+	(*flips) -> value = (*battlefield)[x][y].value;
 	/* ora è necessario un controllo: se è una cella vuota si flippano tutte quelle attorno che sono vuote */
-	if((*battlefield)[pos_x][pos_y].value < 0) bare_neighbours(battlefield, pos_x, pos_y, width, heigth, history, flips + 1);
+	if((*battlefield)[x][y].value < 0) bare_neighbours(battlefield, x, y, width, heigth, history, flips + 1);
+	else (*battlefield)[x][y].state = 1;
 	return flips;
 }
 
@@ -46,20 +44,22 @@ flip** bare(field *battlefield, int width, int heigth, int cell_id, stack *histo
  * Chiamata che ricorsivamente scopre tutti i vicini di una cella vuota finchè non incontra numeri. Tutte le caselle
  * scoperte sono caricate nell'array **flips
  */
-void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history, flip **flips){
+void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack history, flip **flips){
 	turn *temp;
 	if((*battlefield)[x][y].value == MINE) return;
 	if((*battlefield)[x][y].state == FLIPPED) return; /* onde evitare di rompersi i maroni a capire se dalla posizione attuale devo chiamare solo a destra
 												 * o solo a sinistra o quel che è, ognuno chiama tutti quelli attorno. Se sono già scoperti terminano.
 												 */
 	/* se non è una mina, allora deve scoprirsi, registrarsi nello stack dei turni, registrarsi nell'array restituito e chiamare tutti i vicini a sua volta. */
+	(*battlefield)[x][y].state = FLIPPED;
 	temp = (turn*)malloc(sizeof(turn));
 	temp -> cell_id = (*battlefield)[x][y].id;
-	temp -> turn_number = peek(history) -> turn_number;
-	push(history, temp);
+	temp -> turn_number = peek(&history) -> turn_number;
+	push(&history, temp);
 	(*flips) = (flip*)malloc(sizeof(flip));
 	(*flips) -> cell_id = (*battlefield)[x][y].id;
 	(*flips) -> value = (*battlefield)[x][y].value;
+	if((*battlefield)[x][y].value > 0) return;
 	flips++;
 	if(x - 1 > 0){
 		bare_neighbours(battlefield, x - 1, y, width, heigth, history, flips);
@@ -78,31 +78,26 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
 /*
  * Funzione che flagga la casella richiesta e ritorna il suo attuale stato di flag.
  */
-int flag(field *battlefield, int cell_id, int width, int heigth){
-	int x, y;
-	x = cell_id % width;
-	y = cell_id / width;
+int flag(field *battlefield, int x, int y, int width, int heigth){
 	(*battlefield)[x][y].flagged = !((*battlefield)[x][y].flagged);
 	return (*battlefield)[x][y].flagged;
 }
 
 /*
- * Funzione che annulla tutte le mosse fino a quella richiesta COMPRESA.
+ * Funzione che annulla tutte le mosse fino a quella richiesta esclusa (rollback al turno 5 = rollback alla fine del turno 5).
  * Restituisce l'array degli id delle caselle da ricoprire
  */
-int* rollback(field *battlefield, int rollback_target, stack *history, int width){
-	int *ids, x, y;
+void rollback(field *battlefield, int rollback_target, stack history, int width){
+	int id, x, y;
 	turn *popd;
-	ids = (int*)malloc(sizeof(int) * count(history));
-	while(peek(history) -> turn_number >= rollback_target){
-		popd = pop(history);
-		*ids = popd -> cell_id;
-		x = *ids % width;
-		y = *ids / width;
-		(*battlefield)[x][y].state = 0;
-		ids++;
+	while(peek(&history) -> turn_number > rollback_target){
+		popd = pop(&history);
+		printf("<rollback> Got to reach turn %d, popped turn %d, for cell_id %d", rollback_target, popd -> turn_number, popd -> cell_id);
+		id = popd -> cell_id;
+		x = id % width;
+		y = id / width;
+		(*battlefield)[x][y].state = COVERED;
 	}
-	return ids;
 }
 
 int win(field *f, int width, int heigth){
