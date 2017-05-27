@@ -6,7 +6,7 @@
 void bare(field *battlefield, int width, int heigth, int x, int y, stack *history);
 int flag(field *battlefield, int x, int y, int width, int heigth);
 void rollback(field *battlefield, int rollback_target, stack *history, int width);
-void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history);
+void bare_ric(field *battlefield, int x, int y, int width, int heigth, stack *history);
 
 /*
  * La funzione scopre il valore di una cella nella struttura dati.
@@ -29,7 +29,7 @@ void bare(field *battlefield, int width, int heigth, int x, int y, stack *histor
 	temp_turn -> cell_id = y * width + x;
 	push(history, temp_turn);
 	/* ora è necessario un controllo: se è una cella vuota si flippano tutte quelle attorno che sono vuote */
-	if((*battlefield)[x][y].value < 0) bare_neighbours(battlefield, x, y, width, heigth, history);
+	if((*battlefield)[x][y].value < 0) bare_ric(battlefield, x, y, width, heigth, history);
 	else (*battlefield)[x][y].state = 1;
 }
 
@@ -37,7 +37,7 @@ void bare(field *battlefield, int width, int heigth, int x, int y, stack *histor
  * Chiamata che ricorsivamente scopre tutti i vicini di una cella vuota finchè non incontra numeri. Tutte le caselle
  * scoperte sono caricate nell'array **flips
  */
-void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, stack *history){
+void bare_ric(field *battlefield, int x, int y, int width, int heigth, stack *history){
 	turn *temp;
 	if((*battlefield)[x][y].value == MINE) return;
 	if((*battlefield)[x][y].state == FLIPPED) return; /* onde evitare di rompersi i maroni a capire se dalla posizione attuale devo chiamare solo a destra
@@ -51,17 +51,17 @@ void bare_neighbours(field *battlefield, int x, int y, int width, int heigth, st
 	push(history, temp);
 	if((*battlefield)[x][y].value > 0) return;
 	if(x - 1 > 0){
-		bare_neighbours(battlefield, x - 1, y, width, heigth, history);
-		if(y - 1 > 0) bare_neighbours(battlefield, x - 1, y - 1, width, heigth, history);
-		if(y + 1 < heigth) bare_neighbours(battlefield, x - 1, y + 1, width, heigth, history);
+		bare_ric(battlefield, x - 1, y, width, heigth, history);
+		if(y - 1 > 0) bare_ric(battlefield, x - 1, y - 1, width, heigth, history);
+		if(y + 1 < heigth) bare_ric(battlefield, x - 1, y + 1, width, heigth, history);
 	}
 	if(x + 1 < width){
-		bare_neighbours(battlefield, x + 1, y, width, heigth, history);
-		if(y - 1 > 0) bare_neighbours(battlefield, x + 1, y - 1, width, heigth, history);
-		if(y + 1 < heigth) bare_neighbours(battlefield, x + 1, y + 1, width, heigth, history);
+		bare_ric(battlefield, x + 1, y, width, heigth, history);
+		if(y - 1 > 0) bare_ric(battlefield, x + 1, y - 1, width, heigth, history);
+		if(y + 1 < heigth) bare_ric(battlefield, x + 1, y + 1, width, heigth, history);
 	}
-	if(y - 1 > 0) bare_neighbours(battlefield, x, y - 1, width, heigth, history);
-	if(y + 1 < heigth) bare_neighbours(battlefield, x, y + 1, width, heigth, history);
+	if(y - 1 > 0) bare_ric(battlefield, x, y - 1, width, heigth, history);
+	if(y + 1 < heigth) bare_ric(battlefield, x, y + 1, width, heigth, history);
 }
 
 /*
