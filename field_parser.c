@@ -8,25 +8,22 @@ void set_numbers_around(field *f, int x, int y, int width, int heigth);
 field* parse(char* filename, int *width, int *heigth){
 	FILE *source;
 	field* parsed;
-	char *useless;
 	int *max_x, *max_y, *buff_pos_x, *buff_pos_y, id_distributor = 0, i, j, fail;
 	parsed = (field*)malloc(sizeof(field));
 	max_x = (int*)malloc(sizeof(int));
 	max_y = (int*)malloc(sizeof(int));
 	buff_pos_x = (int*)malloc(sizeof(int));
 	buff_pos_y = (int*)malloc(sizeof(int));
-	useless = (char*)malloc(sizeof(int));
 	*buff_pos_x = *buff_pos_y = 0;
 	source = fopen(filename, "r");
 	if(!source)	return NULL;
 	/* parso prima numero di righe e di colonne, o restituisco null se il file non è nel formato appropriato */
-	if(!fscanf(source, "%d,%d", max_x, max_y)) return NULL;
+	if(!fscanf(source, "%d,%d\n", max_x, max_y)) return NULL;
 	*width = *max_x;
 	*heigth = *max_y;
 	/* Questa operazione solleva un warning in compilazione. E' una questione nota, ma ho bisogno di parsare 
 	 * la linea vuota dopo width e height.
 	 */
-	fscanf(source, "", useless);
 	/* inizializzo tutte le caselle con contenuto nullo */
 	for(i = 0; i < *max_x; i++)
 		for(j = 0; j < *max_y; j++){

@@ -30,7 +30,7 @@ void bare(field *battlefield, int width, int heigth, int x, int y, stack *histor
 	push(history, temp_turn);
 	/* ora è necessario un controllo: se è una cella vuota si flippano tutte quelle attorno che sono vuote */
 	if((*battlefield)[x][y].value < 0) bare_ric(battlefield, x, y, width, heigth, history);
-	else (*battlefield)[x][y].state = 1;
+	else (*battlefield)[x][y].state = FLIPPED;
 }
 
 /*
@@ -50,17 +50,17 @@ void bare_ric(field *battlefield, int x, int y, int width, int heigth, stack *hi
 	temp -> turn_number = peek(history) -> turn_number;
 	push(history, temp);
 	if((*battlefield)[x][y].value > 0) return;
-	if(x - 1 > 0){
+	if(x - 1 >= 0){
 		bare_ric(battlefield, x - 1, y, width, heigth, history);
-		if(y - 1 > 0) bare_ric(battlefield, x - 1, y - 1, width, heigth, history);
+		if(y - 1 >= 0) bare_ric(battlefield, x - 1, y - 1, width, heigth, history);
 		if(y + 1 < heigth) bare_ric(battlefield, x - 1, y + 1, width, heigth, history);
 	}
 	if(x + 1 < width){
 		bare_ric(battlefield, x + 1, y, width, heigth, history);
-		if(y - 1 > 0) bare_ric(battlefield, x + 1, y - 1, width, heigth, history);
+		if(y - 1 >= 0) bare_ric(battlefield, x + 1, y - 1, width, heigth, history);
 		if(y + 1 < heigth) bare_ric(battlefield, x + 1, y + 1, width, heigth, history);
 	}
-	if(y - 1 > 0) bare_ric(battlefield, x, y - 1, width, heigth, history);
+	if(y - 1 >= 0) bare_ric(battlefield, x, y - 1, width, heigth, history);
 	if(y + 1 < heigth) bare_ric(battlefield, x, y + 1, width, heigth, history);
 }
 
@@ -68,7 +68,8 @@ void bare_ric(field *battlefield, int x, int y, int width, int heigth, stack *hi
  * Funzione che flagga la casella richiesta e ritorna il suo attuale stato di flag.
  */
 int flag(field *battlefield, int x, int y, int width, int heigth){
-	(*battlefield)[x][y].flagged = !((*battlefield)[x][y].flagged);
+	if((*battlefield)[x][y].flagged) (*battlefield)[x][y].flagged = FALSE;
+	else (*battlefield)[x][y].flagged = TRUE;
 	return (*battlefield)[x][y].flagged;
 }
 
@@ -79,11 +80,16 @@ int flag(field *battlefield, int x, int y, int width, int heigth){
 void rollback(field *battlefield, int rollback_target, stack *history, int width){
 	int id, x, y;
 	turn *popd;
+	if(peek(history) -> turn_number < rollback_target) return;
 	while(peek(history) -> turn_number >= rollback_target){
 		popd = pop(history);
 		id = popd -> cell_id;
+		/*
 		y = id % width;
 		x = id / width;
+		*/
+		x = id % width;
+		y = id / width;
 		(*battlefield)[x][y].state = COVERED;
 	}
 }
