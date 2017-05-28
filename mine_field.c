@@ -10,14 +10,6 @@
 #include "mine_field.h"
 #include "stack.h"
 
-/* Dato che questa non sara' la versione definitva ma solo una prova
- * su linea di comando, non perdo nemmeno tempo a provare ncurses
- * dato che verra' realizzata la grafica con GTK3+.
- * Quindi mi limito allo stretto necessario per far qualcosa di decente,
- * ovvero gestire dei comandi inviati da linea di comando per modificare
- * le caselle.
- * In fondo, questo main e' a solo scopo di test in attesa della vera GUI
- */
 #define SHELL_WIDTH 120
 #define STRING_LENGTH 200
 
@@ -45,7 +37,7 @@ int main(){
 	while(!quit){
 		clrscr();
 		game_menu();
-		scanf("%c", &menu_decision);
+		menu_decision = getch();
 		switch(menu_decision){
 			case '0':
 				quit = TRUE;
@@ -138,7 +130,7 @@ int play(field *battlefield, int width, int heigth, int rollbacks){
 	char *instructions;
 	stack history;
 	turn *t;
-	int jump_distance = 1, n_turn = 1, end_game = FALSE, end_reason, lose, x, y; /* end_reason: FALSE -> persa, TRUE -> vinta */
+	int jump_distance = 1, n_turn = 1, end_game = FALSE, end_reason, lose, x, y, wanna_leave; /* end_reason: FALSE -> persa, TRUE -> vinta */
 	instructions = "Istruzioni: ci sono tre comandi disponibili:\n\t1)Scopri cella: scrivere 'scopri x y' dove x,y sono le coordinate;\n\t2)Metti/togli la bandierina: scrivere 'bandierina x y' dove x e y sono le coordinate\n\t3)Annulla mossa: scrivi 'annulla'";
 	t = (turn*)malloc(sizeof(turn));
 	t -> cell_id = 0;
@@ -148,7 +140,8 @@ int play(field *battlefield, int width, int heigth, int rollbacks){
 	wanna_leave = FALSE;
 	while(!end_game){
 		clrscr();
-		printf("Debug: loss(battlefield, width, heigth) == %d, rollbacks <= 0 == %d\n", loss(battlefield, width, heigth), rollbacks <= 0);
+		if(!loss(battlefield, width, heigth)) wanna_leave = FALSE;
+		else printf("Hai scoperto una mina. Qualsiasi mossa diversa da annulla implica la sconfitta.\n");
 		print_field(battlefield, width, heigth, instructions);
 		printf("\nTurno %d\nAnnullamenti: %d\nNumero di turni di annulla: %d\nInserire comando: ", n_turn, rollbacks, jump_distance);
 		scanf("%s", command_buffer);
@@ -178,14 +171,13 @@ int play(field *battlefield, int width, int heigth, int rollbacks){
 			end_game = TRUE;
 			end_reason = TRUE;
 		}
-		if(lose){
+		if(lose || (loss(battlefield, width, heigth) && wanna_leave)){
 			end_reason = FALSE;
 			end_game = TRUE;
 		}
+		if(loss(battlefield, width, heigth) && !wanna_leave) wanna_leave = TRUE;
 	}
 	clrscr();
-	printf("Debug: loss(battlefield, width, heigth) == %d, rollbacks <= 0 == %d\n", loss(battlefield, width, heigth), rollbacks <= 0);
-	printf("Debug Peek = turn_number -> %d, cell_id -> %d, turno dopo annulla -> %d\n", peek(&history) -> turn_number, peek(&history) -> cell_id, n_turn);
 	print_field(battlefield, width, heigth, instructions);
 	end_reason == TRUE ? printf("HAI VINTO\n") : printf("HAI PERSO\n");
 	printf("Premi per continuare...");
@@ -197,9 +189,9 @@ void print_field(field *battlefield, int width, int heigth, char *instructions){
 	int i, j;
 	printf("%s\n", instructions);
 	printf("    ");
-	for(i = 0; i < width; i++) printf("%d ", i);
+	for(i = 0; i < heigth; i++) printf("%d ", i);
 	printf("\n    ");
-	for(i = 0; i < width; i++) printf("__", i);
+	for(i = 0; i < heigth; i++) printf("__", i);
 	printf("\n");
 	for(i = 0; i < width; i++){
 		printf("%d  |", i);
