@@ -18,8 +18,8 @@ void init(stack l){
  */
 void push(stack* l, turn* t){
     node* temp;
-    temp = NULL;
-    if(!temp) return;
+    /*temp = NULL;*/
+    /*if(!temp) return;*/
     if (!(*l))
     {
         (*l) =(node*)malloc(sizeof(node));

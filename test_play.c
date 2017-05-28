@@ -5,6 +5,7 @@
 #include "structures.h"
 #include "play.h"
 #include "field_parser.h"
+#include "stack.h"
 
 /*
  * '?' : mi passano null (quando succede?)
