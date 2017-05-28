@@ -49,7 +49,7 @@ typedef struct Turn{
  */
 typedef struct Node{
     turn info;
-    struct node *ptr;
+    struct Node *ptr;
 } node;
 
 /*
