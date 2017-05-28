@@ -39,7 +39,7 @@ int save(field *f, int width, int heigth, char *path){
 	if(!destination) {
 		return FALSE;
 	}
-	if(!fprintf(destination, output) && strlen(output) > 0){
+	if(!fprintf(destination, "%s", output) && strlen(output) > 0){
 		free(actual_path);
 		free(output);
 		return FALSE;

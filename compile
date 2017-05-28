@@ -1,0 +1,12 @@
+find . -type f -iname \*.o -delete
+if [-e mine_field]
+then rm mine_field
+fi
+gcc -std=c89 -pedantic -Wall -c stack.c
+gcc -std=c89 -pedantic -Wall -c field_parser.c
+gcc -std=c89 -pedantic -Wall -c field_writer.c
+gcc -std=c89 -pedantic -Wall -c field_generator.c
+gcc -std=c89 -pedantic -Wall -c play.c
+gcc -std=c89 -pedantic -Wall -c mine_field.c
+gcc -std=c89 -pedantic -Wall stack.o field_parser.o field_writer.o field_generator.o play.o mine_field.o -o mine_field
+rm *.o

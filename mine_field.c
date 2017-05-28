@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
 #include "structures.h"
 #include "play.h"
 #include "field_parser.h"
@@ -10,7 +9,7 @@
 #include "mine_field.h"
 #include "stack.h"
 
-#define SHELL_WIDTH 120
+#define SHELL_WIDTH 80
 #define STRING_LENGTH 200
 
 int main(){
@@ -37,7 +36,7 @@ int main(){
 	while(!quit){
 		clrscr();
 		game_menu();
-		menu_decision = getch();
+		menu_decision = getchar();
 		switch(menu_decision){
 			case '0':
 				quit = TRUE;
@@ -57,20 +56,20 @@ int main(){
 
 void clrscr()
 {
-    system("@cls||clear");
+    system("clear");
 }
 
 void game_menu(){
 	int i;
 	for(i = 0; i < SHELL_WIDTH; i++)
 		printf("*");
-	for(i = 0; i < 8; i++)
+	for(i = 0; i < 5; i++)
 		printf("\n");
-	printf("\t\t\t\t\t\t      CAMPO MINATO\n");
+	printf("\t\t\t\t      CAMPO MINATO\n");
 	for(i = 0; i < 4; i++)
 		printf("\n");
 	printf("0)Esci\n1)Nuova Partita\n2)Carica Da File");
-	for(i = 0; i < 13; i++)
+	for(i = 0; i < 10; i++)
 		printf("\n");
 	for(i = 0; i < SHELL_WIDTH; i++)
 		printf("*");
@@ -181,7 +180,7 @@ int play(field *battlefield, int width, int heigth, int rollbacks){
 	print_field(battlefield, width, heigth, instructions);
 	end_reason == TRUE ? printf("HAI VINTO\n") : printf("HAI PERSO\n");
 	printf("Premi per continuare...");
-	getch();
+	getchar();
 	return 0;
 }
 
@@ -191,7 +190,7 @@ void print_field(field *battlefield, int width, int heigth, char *instructions){
 	printf("    ");
 	for(i = 0; i < heigth; i++) printf("%d ", i);
 	printf("\n    ");
-	for(i = 0; i < heigth; i++) printf("__", i);
+	for(i = 0; i < heigth; i++) printf("__");
 	printf("\n");
 	for(i = 0; i < width; i++){
 		printf("%d  |", i);
